@@ -36,6 +36,8 @@ spec:
 {{- if eq .Values.tlsIssuer.provider "cloudflare" }}
         cloudflare:
           email: {{ .Values.tlsIssuer.cloudflare.email }}
-          apiToken: {{ .Values.tlsIssuer.cloudflare.apiToken }}
+          apiTokenSecretRef:
+            name: cloudflare-api-token-secret
+            key: api-token
 {{- end }}
 {{- end }}
