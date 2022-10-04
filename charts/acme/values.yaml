@@ -15,6 +15,31 @@ jxRequirements:
 
 secretName: ""
 
-issuer:
-  enabled: false
+
+tlsIssuer:
   cluster: false
+  production: false
+
+  email: ""
+
+  domain: ""
+  provider: ""
+
+  #Cloudflare properties
+  cloudflare:
+    email: ""
+    apiToken: ""
+
+  #Route53 properties
+  route53:
+    region: ""
+
+  #Azure DNS properties
+  azureDNS:
+    subscriptionID: ""
+    resourceGroupName: ""
+    hostedZoneName: ""
+
+  #Google Cloud DNS properties
+  cloudDNS:
+    project: ""

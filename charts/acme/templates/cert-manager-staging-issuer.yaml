@@ -1,7 +1,4 @@
-{{- if .Values.jxRequirements.ingress.tls.enabled }}
-{{- if not .Values.jxRequirements.ingress.tls.production }}
-{{- if not .Values.issuer.cluster }}
-{{- if .Values.issuer.enabled }}
+{{- if and (not .Values.tlsIssuer.production) (not .Values.tlsIssuer.cluster)}}
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
@@ -9,45 +6,35 @@ metadata:
 spec:
   acme:
     server: https://acme-staging-v02.api.letsencrypt.org/directory
-    email: "{{ .Values.jxRequirements.ingress.tls.email }}"
+    email: "{{ .Values.tlsIssuer.email }}"
     # Name of a secret used to store the ACME account private key
     privateKeySecretRef:
       name: letsencrypt-staging
     solvers:
     - selector:
         dnsNames:
-        - "*.{{ .Values.jxRequirements.ingress.domain }}"
-        - "{{ .Values.jxRequirements.ingress.domain }}"
-{{- if eq .Values.jxRequirements.cluster.provider "kubernetes" }}
-      http01:
-        ingress:
-          class: nginx
-{{- else }}
-      # ACME DNS-01 provider configurations
+        - "*.{{ .Values.tlsIssuer.domain }}"
+        - "{{ .Values.tlsIssuer.domain }}"
       dns01:
-{{- if eq .Values.jxRequirements.cluster.provider "gke" }}
+{{- if eq .Values.tlsIssuer.provider "cloudDNS" }}
         cloudDNS:
-          # The project in which to update the DNS zone
-          project: "{{ .Values.jxRequirements.cluster.project }}"
-{{- if .Values.secretName }}
-          # A secretKeyRef to a google cloud json service account
-          serviceAccountSecretRef:
-            name: {{ .Values.secretName }}
-            key: credentials.json
+          project: {{ .Values.tlsIssuer.cloudDNS.project }}
 {{- end }}
-{{- end }}
-{{- if eq .Values.jxRequirements.cluster.provider "eks" }}
+
+{{- if eq .Values.tlsIssuer.provider "route53" }}
         route53:
-          region: {{ .Values.jxRequirements.cluster.region }}
+          region: {{ .Values.tlsIssuer.route53.region }}
 {{- end }}
-{{- if eq .Values.jxRequirements.cluster.provider "aks" }}
+
+{{- if eq .Values.tlsIssuer.provider "azureDNS" }}
         azureDNS:
-          subscriptionID: {{ .Values.jxRequirements.cluster.azure.dns.subscriptionId }}
-          resourceGroupName: {{ .Values.jxRequirements.cluster.azure.dns.resourceGroup }}
-          hostedZoneName: {{ .Values.jxRequirements.ingress.domain }}
+          subscriptionID: {{ .Values.tlsIssuer.azureDNS.subscriptionId }}
+          resourceGroupName: {{ .Values.tlsIssuer.azureDNS.resourceGroup }}
+          hostedZoneName: {{ .Values.tlsIssuer.azureDNS.domain }}
 {{- end }}
-{{- end }}
-{{- end }}
-{{- end }}
-{{- end }}
+
+{{- if eq .Values.tlsIssuer.provider "cloudflare" }}
+        cloudflare:
+          email: {{ .Values.tlsIssuer.cloudflare.email }}
+          apiToken: {{ .Values.tlsIssuer.cloudflare.apiToken }}
 {{- end }}
